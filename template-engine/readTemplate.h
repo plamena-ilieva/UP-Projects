@@ -4,12 +4,13 @@
 #include <vector>
 #include <fstream>
 #define formatVector std::vector<std::pair<std::string, std::string>>
+#define strMatrix std::vector<std::vector<std::string>>
 
-bool readTemplate(std::vector<std::string>& templateVector, formatVector& formatData,
+bool readTemplate(strMatrix& templateVector, formatVector& formatData,
                   std::ifstream& inFile);
-bool readLine(std::vector<std::string>& templateVector, const formatVector& formatData,
+bool readLine(strMatrix& templateVector, const formatVector& formatData,
                   const std::string& line);
-bool readCycle(std::vector<std::string>& templateVector, std::vector<std::string> splitInput,
+bool readCycle(strMatrix& templateVector, std::vector<std::string> splitInput,
                formatVector& formatData, std::ifstream& inFile);
 
 bool calcRangeToReplace(const std::string& inputStr, size_t& startIndex,

@@ -1,14 +1,15 @@
 #include "readTemplate.h"
 #include "stringOperations.h"
-
-bool readTemplate(std::vector<std::string>& templateVector, formatVector& formatData,
+const short SIZE = 1024;
+bool readTemplate(strMatrix& templateVector, formatVector& formatData,
                   std::ifstream& inFile){
-    std::string input;
+    char inputLine[SIZE];
     while (!inFile.eof()) {
-        inFile >> input;
+        inFile.getline(inputLine, SIZE);
         if (inFile.eof())
             return true;
 
+        std::string input(inputLine);
         std::vector<std::string> splitInput = split(input, ' ');
         size_t i = 0;
         if (splitInput[0] == "{%") {
@@ -23,55 +24,74 @@ bool readTemplate(std::vector<std::string>& templateVector, formatVector& format
     return true;
 }
 
-bool readLine(std::vector<std::string>& templateVector, const formatVector& formatData,
+bool readLine(strMatrix& templateVector, const formatVector& formatData,
               const std::string& line) {
     size_t index = 0;
     size_t i = 0;
     size_t startIndex = 0;
     size_t endIndex = 0;
-    size_t size = line.size();
-    while(i < size) {
+    size_t lineSize = line.size();
+    size_t templateSize = templateVector.size();
+    templateVector.push_back(std::vector<std::string>());
+
+    while(i < lineSize) {
         if (!calcRangeToReplace(line, startIndex, endIndex, i))
             return false;
 
         if(startIndex == -1){
-            templateVector.push_back(line.substr(endIndex, templateVector.size() - endIndex - 1));
+            templateVector[templateSize].push_back(line.substr
+            (endIndex, templateVector.size() - endIndex - 1));
+            break;
         }
 
-        templateVector.push_back(line.substr(index, index - startIndex));
+        templateVector[templateSize].push_back(line.substr(index, startIndex - index));
 
-        std::string variable = line.substr(startIndex + 3, startIndex - endIndex - 1);
+        std::string variable = line.substr(startIndex + 3, endIndex - startIndex - 6);
         long long varIndex = findKey(formatData, variable);
         if (varIndex == -1)
             return false;
 
-        templateVector.push_back(numToStr(varIndex));
+        templateVector[templateSize].push_back(numToStr(varIndex));
         index = i;
     }
     return true;
 }
 
-bool readCycle(std::vector<std::string>& templateVector, std::vector<std::string> splitInput,
+bool readCycle(strMatrix& templateVector, std::vector<std::string> splitInput,
                formatVector& formatData, std::ifstream& inFile) {
     if (splitInput.size() != 6)
         return false;
     if (splitInput[1] != "for" || splitInput[3] != "in"|| splitInput[5] != "%}")
         return false;
 
+    long long index = findKey(formatData, splitInput[4]);
+    if (index == -1)
+        return false;
+
+    size_t templateSize = templateVector.size();
+    templateVector.push_back(std::vector<std::string>());
+    templateVector[templateSize].push_back("");
+    templateVector[templateSize].push_back(numToStr(index));
+
     std::pair<std::string, std::string> current;
     current.first = splitInput[2];
     formatData.push_back(current);
 
-    std::string line;
+    char line[SIZE];
     while(true) {
-        inFile >> line;
+        inFile.getline(line, SIZE);
         if (inFile.eof())
             break;
-        if (line == "{% endfor %}") {
+        templateSize++;
+
+        std::string lineStr(line);
+        if (lineStr == "{% endfor %}") {
             formatData.pop_back();
+            templateVector.push_back(std::vector<std::string>());
+            templateVector[templateSize].push_back(numToStr(-1));
             return true;
         }
-        if (!readLine(templateVector, formatData, line))
+        if (!readLine(templateVector, formatData, lineStr))
             return false;
 
     }
@@ -81,12 +101,12 @@ bool readCycle(std::vector<std::string>& templateVector, std::vector<std::string
 
 bool calcRangeToReplace(const std::string& inputStr, size_t& startIndex,
                         size_t& endIndex, size_t& i) {
-    startIndex = findThreeSymbols(inputStr, '}', '}', ' ', i);
+    startIndex = findThreeSymbols(inputStr, '{', '{', ' ',i);
     if (startIndex == -1) {
         return true;
     }
 
-    endIndex = findThreeSymbols(inputStr, ' ', '}', '}', i);
+    endIndex = findThreeSymbols(inputStr, ' ', '}', '}', i) + 3;
     if (endIndex == -1)
         return false;
     return true;

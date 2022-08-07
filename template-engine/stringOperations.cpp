@@ -76,19 +76,32 @@ size_t strToNum(const std::string& str) {
     }
     return num;
 }
-std::string numToStr(size_t num) {
+std::string numToStr(long long num) {
     size_t size = calcNumSize(num);
-    char* str = new char[size+1];
-    for (int i = size-1; i >= 0; --i) {
-        str[i] = (num % 10) + '0';
-        num /= 10;
+    if (num >= 0) {
+        char* str = new char[size+1];
+        for (int i = size-1; i >= 0; --i) {
+            str[i] = (num % 10) + '0';
+            num /= 10;
+        }
+        str[size] = '\0';
+        std::string string(str);
+        return string;
     }
-    str[size] = '\0';
-    std::string string(str);
-    return string;
+    else {
+        char* str = new char[size+2];
+        for (int i = size-1; i >= 1; --i) {
+            str[i] = (num % 10) + '0';
+            num /= 10;
+        }
+        str[size] = '\0';
+        str[0] = '-';
+        std::string string(str);
+        return string;
+    }
 }
 
-size_t calcNumSize(size_t num) {
+size_t calcNumSize(long long num) {
     size_t size = 1;
     while(num>9){
         num /= 10;
