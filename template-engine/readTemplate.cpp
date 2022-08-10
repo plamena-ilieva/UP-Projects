@@ -88,6 +88,7 @@ bool readCycle(strMatrix& templateVector, std::vector<std::string> splitInput,
         if (lineStr == "{% endfor %}") {
             formatData.pop_back();
             templateVector.push_back(std::vector<std::string>());
+            templateVector[templateSize].push_back("");
             templateVector[templateSize].push_back(numToStr(-1));
             return true;
         }

@@ -3,6 +3,7 @@
 #include "readData.h"
 #include "createDocument.h"
 #include "readTemplate.h"
+#include "stringOperations.h"
 
 #define formatVector std::vector<std::pair<std::string, std::string>>
 #define dataVector std::vector<std::string*>
@@ -30,13 +31,20 @@ int main() {
     if (!readTemplate(templateData, formatData, inFileTemplate))
         return 1;
 
-    /*dataVector memberData;
+    size_t counter = 1;
     while(true) {
+        strMatrix memberData;
         readMember(memberData, formatData, inFileData);
-
         if (inFileData.eof())
             break;
-    }*/
-
+        std::ofstream outFile(numToStr(counter));
+        if (!outFile.is_open()) {
+            std::cout << "Error while opening file!" << std::endl;
+            return -1;
+        }
+        writeDocument(memberData, templateData, formatData, outFile);
+        outFile.close();
+        ++counter;
+    }
     return 0;
 }

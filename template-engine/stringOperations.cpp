@@ -65,15 +65,18 @@ long long findThreeSymbols(const std::string &str, char first, char second, char
     return -1;
 }
 
-size_t strToNum(const std::string& str) {
+long long strToNum(const std::string& str) {
     size_t num = 0;
     size_t counter = 1;
     size_t size = str.size();
+    size_t i = (str[0]=='-')?1:0;
 
-    for (size_t i = 0; i < size; ++i) {
+    for (; i < size; ++i) {
         num += (str[i] - '0')*counter;
         counter *= 10;
     }
+    if (str[0] == '-')
+        num *= -1;
     return num;
 }
 std::string numToStr(long long num) {
@@ -90,11 +93,12 @@ std::string numToStr(long long num) {
     }
     else {
         char* str = new char[size+2];
-        for (int i = size-1; i >= 1; --i) {
+        num *= -1;
+        for (int i = size; i >= 1; --i) {
             str[i] = (num % 10) + '0';
             num /= 10;
         }
-        str[size] = '\0';
+        str[size+1] = '\0';
         str[0] = '-';
         std::string string(str);
         return string;

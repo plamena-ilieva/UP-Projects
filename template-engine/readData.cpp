@@ -1,9 +1,10 @@
 #include "readData.h"
 #include "stringOperations.h"
-
+const int SIZE = 1024;
 void readFormat(formatVector &formatData, std::ifstream &inFile) {
-    std::string formatInput;
-    inFile >> formatInput;
+    char input[SIZE];
+    inFile.getline(input, SIZE);
+    std::string formatInput(input);
     std::vector<std::string> format = split(formatInput, ',');
     for (std::string &variable: format) {
         std::pair<std::string, std::string> current;
@@ -15,24 +16,31 @@ void readFormat(formatVector &formatData, std::ifstream &inFile) {
 
 }
 
-void readMember(dataVector &memberData, const formatVector &formatData, std::ifstream &inFile){
+void readMember(strMatrix &memberData, const formatVector &formatData, std::ifstream &inFile){
+    size_t count = 0;
     for(auto &variable: formatData) {
+        memberData.push_back(std::vector<std::string>());
         if (variable.second == "string") {
-            char input[1024];
-            inFile.getline(input, 1024, ',');
-            std::string* ptr = new std::string(input);
-            memberData.push_back(ptr);
+            char input[SIZE];
+            inFile.getline(input, SIZE, ',');
+
+            if (input[0] == '\0')
+                return;
+            std::string str(input);
+            memberData[count++].push_back(str);
         }
         else if (variable.second == "string*") {
-            char input[1024];
-            inFile.getline(input, 1024, '}');
+            char input[SIZE];
+            inFile.getline(input, SIZE, '}');
+            if (input[0] == '\0')
+                return;
             std::string inputStr = std::string(input).substr(1);
             std::vector<std::string> splitInput = split(inputStr, ',');
-            std::string *ptr = new std::string[splitInput.size()];
-            for (int i = 0; i < splitInput.size(); ++i) {
-                ptr[i] = splitInput[i];
+            for (auto & i : splitInput) {
+                memberData[count].push_back(i);
             }
-            memberData.push_back(ptr);
+            ++count;
         }
     }
+    inFile.ignore();
 }
